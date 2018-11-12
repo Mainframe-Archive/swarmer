@@ -1,0 +1,20 @@
+FROM alpine:3.7
+
+RUN mkdir /app && mkdir /app/bin
+
+# Set the working directory to /app
+WORKDIR /app
+ARG SRCDIR
+
+# Install dependencies
+RUN apk update && \
+    apk upgrade && \
+    apk add jq git alpine-sdk go linux-headers bash
+
+WORKDIR /app/go-ethereum
+
+# Copy script for starting swarm into the container
+COPY start_src.sh /app
+COPY $SRCDIR /app
+
+CMD ./start_src.sh .

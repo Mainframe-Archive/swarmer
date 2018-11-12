@@ -1,0 +1,6 @@
+version: '2'
+services:
+  swarm:
+    build: .
+    command: ["/app/start.sh", "-r ${REPO}", "-c ${CHECKOUT}", "-n ${NODES}", "-e ${ENS}"]
+    

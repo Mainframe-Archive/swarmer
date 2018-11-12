@@ -1,0 +1,12 @@
+version: '2'
+services:
+  swarm:
+    build: .
+    command: ["/app/start.sh", "-r ${REPO}", "-c ${CHECKOUT}", "-n ${NODES}", "-e ${ENS}"]
+    ports:
+      - "8500"
+      - "8545"
+      - "8546"
+      - "30399"
+      - "30301"
+      - "30303"

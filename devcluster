@@ -1,0 +1,29 @@
+#!/usr/bin/env bash
+
+while getopts ":r:c:n:e:h" opt; do
+  case ${opt} in
+    r ) export REPO=$OPTARG && echo "Using source from $REPO" 
+      ;;
+    c ) export CHECKOUT=$OPTARG && echo "Checking out $CHECKOUT"
+      ;;
+    n ) export NODES=$OPTARG && echo "Starting $NODES Swarm nodes"
+      ;;
+    e ) export ENS=$OPTARG && echo "Using $ENS for ENS API"
+      ;;
+    h ) echo "Usage: devcluster [-r git repo url] [-c branch, tag, or commit to checkout] [-n number of swarm nodes to start] [-e ens-api] [-h help]"
+      ;;
+    \? ) echo "Usage: devcluster [-r git repo url] [-c branch, tag, or commit to checkout] [-n number of swarm nodes to start] [-e ens-api] [-h help]"
+      ;;
+  esac
+done
+
+exec 3< <(docker-compose up --build --scale swarm=$NODES --force-recreate)
+sed "/swarm_1  | Done building.$/q" <&3 ; cat <&3 & 
+
+COUNTER=0
+while [  $COUNTER -lt $NODES ]; do
+    echo Getting info from node  $COUNTER
+    docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' swarm_build_swarm${COUNTER}
+    let COUNTER=COUNTER+1 
+done
+

@@ -1,0 +1,3 @@
+# ignore .git and .DS_Store
+../.git
+../.DS_Store
