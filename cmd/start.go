@@ -32,7 +32,7 @@ type IStartCommand interface {
 type StartCommand struct {
 	config       models.Config
 	dockerClient *client.Client
-	adminClient  admin.IAdminClient
+	adminClient  admin.IClient
 	lookup       util.ILookup
 	parser       util.IConfigParser
 }
@@ -41,7 +41,7 @@ type StartCommand struct {
 func GetStartCommand(
 	c models.Config,
 	d *client.Client,
-	a admin.IAdminClient,
+	a admin.IClient,
 	l util.ILookup,
 	p util.IConfigParser,
 ) *StartCommand {
