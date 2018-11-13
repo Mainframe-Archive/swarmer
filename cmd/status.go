@@ -37,7 +37,7 @@ func GetStatusCommand(c models.Config, d *client.Client, a admin.IAdminClient) *
 	return &s
 }
 
-// Stop is the command that stops the Swarm nodes.
+// Status shows the nodeInfo in JSON format of currently running nodes.
 func (s *StatusCommand) Status(c *cli.Context) error {
 
 	var options types.ContainerListOptions

@@ -20,6 +20,7 @@ import (
 // to make use of the Dockerfile and docker-compose.yml files etc..
 var DATAPATH = os.Getenv("GOPATH") + "/src/github.com/MainframeHQ/swarmer/"
 
+// APPNAME is aptly named.
 const APPNAME = "swarmer"
 
 func init() {
@@ -54,7 +55,7 @@ func main() {
 		panic("Must have Docker compatible with API 1.38: " + err.Error())
 	}
 
-	adminClient := admin.GetAdminClient()
+	adminClient := admin.GetClient()
 	lookup := util.GetLookup()
 	parser := util.GetConfigParser()
 
