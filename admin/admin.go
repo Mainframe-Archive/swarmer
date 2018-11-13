@@ -4,23 +4,24 @@ import (
 	"github.com/ethereum/go-ethereum/rpc"
 )
 
-// IAdminClient is the interface for interacting with the Geth admin API.
-type IAdminClient interface {
+// IClient is the interface for interacting with the Geth admin API.
+type IClient interface {
 	GetConnection(address string) (*rpc.Client, error)
 }
 
-// AdminClient is the struct for this implementation of IAdminClient.
-type AdminClient struct {
+// Client is the struct for this implementation of IClient.
+type Client struct {
 }
 
-func GetAdminClient() *AdminClient {
-	var s = AdminClient{}
+// GetClient returns a pointer to an instance of this implementation of IClient.
+func GetClient() *Client {
+	var s = Client{}
 
 	return &s
 }
 
 // GetConnection returns a connection to the given Geth instance.
-func (a *AdminClient) GetConnection(address string) (*rpc.Client, error) {
+func (a *Client) GetConnection(address string) (*rpc.Client, error) {
 
 	client, err := rpc.DialHTTP(address)
 	if err != nil {
