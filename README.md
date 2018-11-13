@@ -1,3 +1,5 @@
+[![Go Report Card](https://goreportcard.com/badge/github.com/MainframeHQ/swarmer)](https://goreportcard.com/report/github.com/MainframeHQ/swarmer)
+
 # Swarmer
 
 Swarmer treats Swarm similar to a dev dependency. Add a `swarmer.yml` file to your directory and then simply run `swarmer start`.
