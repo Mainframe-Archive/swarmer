@@ -16,18 +16,18 @@ import (
 
 // IStatusCommand is the interface to implement for the stop command.
 type IStatusCommand interface {
-	GetStatusCommand(c models.Config, d *client.Client, a admin.IAdminClient) *StatusCommand
+	GetStatusCommand(c models.Config, d *client.Client, a admin.IClient) *StatusCommand
 }
 
 // StatusCommand is the struct for this implementation of IStatusCommand.
 type StatusCommand struct {
 	config       models.Config
 	dockerClient *client.Client
-	adminClient  admin.IAdminClient
+	adminClient  admin.IClient
 }
 
 // GetStatusCommand returns a pointer to a new instance of this implementation of IStatusCommand.
-func GetStatusCommand(c models.Config, d *client.Client, a admin.IAdminClient) *StatusCommand {
+func GetStatusCommand(c models.Config, d *client.Client, a admin.IClient) *StatusCommand {
 	var s = StatusCommand{
 		config:       c,
 		dockerClient: d,
