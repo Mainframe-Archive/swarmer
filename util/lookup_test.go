@@ -21,4 +21,9 @@ func TestLookup_GetIP(t *testing.T) {
 	if ip == "" || err != nil {
 		t.Error("GetIP didn't return an IP address for Google")
 	}
+
+	ip, err = l.GetIP("ABC FTW")
+	if err == nil {
+		t.Error("Looking up IP for ABC FTW should have thrown an error...")
+	}
 }
