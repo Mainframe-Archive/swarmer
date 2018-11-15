@@ -21,4 +21,10 @@ func TestConfigParser_ParseYamlConfig(t *testing.T) {
 	if err != nil {
 		t.Errorf("Error parsing yml file %s", err.Error())
 	}
+
+	_, err = parser.ParseYamlConfig("non existent file")
+
+	if err == nil {
+		t.Error("Trying to parse a missing YAML file should have thrown an error...")
+	}
 }
