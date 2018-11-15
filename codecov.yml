@@ -1,0 +1,3 @@
+# Fixes github paths for the codecoverage browser
+fixes:
+- "src/::blob/"

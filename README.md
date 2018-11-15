@@ -1,4 +1,4 @@
-[![Go Report Card](https://goreportcard.com/badge/github.com/MainframeHQ/swarmer)](https://goreportcard.com/report/github.com/MainframeHQ/swarmer) [![CircleCI](https://circleci.com/gh/MainframeHQ/swarmer.svg?style=svg)](https://circleci.com/gh/MainframeHQ/swarmer) [![Gitter chat](https://badges.gitter.im/MainframeHQ/gitter.png)](https://gitter.im/MainframeHQ/Lobby)
+[![Go Report Card](https://goreportcard.com/badge/github.com/MainframeHQ/swarmer)](https://goreportcard.com/report/github.com/MainframeHQ/swarmer) [![CircleCI](https://circleci.com/gh/MainframeHQ/swarmer.svg?style=svg)](https://circleci.com/gh/MainframeHQ/swarmer) [![codecov](https://codecov.io/gh/MainframeHQ/swarmer/branch/master/graph/badge.svg)](https://codecov.io/gh/MainframeHQ/swarmer) [![Gitter chat](https://badges.gitter.im/MainframeHQ/gitter.png)](https://gitter.im/MainframeHQ/Lobby)
 
 # Swarmer
 

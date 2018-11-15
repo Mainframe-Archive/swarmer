@@ -24,4 +24,5 @@ jobs:
     # specify any bash command here prefixed with `run: `
     - run: go get -u golang.org/x/lint/golint
     - run: golint -set_exit_status ./. admin/... cmd/... models/... util/...
-    - run: go test -v ./...
+    - run: ./test.sh
+    - run: bash <(curl -s https://codecov.io/bash)
