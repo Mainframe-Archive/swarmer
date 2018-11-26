@@ -19,6 +19,7 @@ import (
 
 	log "github.com/camronlevanger/logrus"
 	"gopkg.in/urfave/cli.v1"
+	"github.com/otiai10/copy"
 
 	"github.com/MainframeHQ/swarmer/models"
 )
@@ -75,6 +76,13 @@ func (s *StartCommand) Start(c *cli.Context) error {
 		s.config, err = s.parser.ParseYamlConfig("../" + s.config.Config)
 		if err != nil {
 			log.Fatal(err)
+			return err
+		}
+	}
+
+	if s.config.Add != "" {
+		err := copy.Copy(s.config.Add, "./addme")
+		if err != nil {
 			return err
 		}
 	}

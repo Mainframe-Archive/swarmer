@@ -24,13 +24,6 @@ var DATAPATH = os.Getenv("GOPATH") + "/src/github.com/MainframeHQ/swarmer/"
 const APPNAME = "swarmer"
 
 func init() {
-	if runtime.GOOS == "darwin" {
-		log.Debug("Mac OS detected")
-	} else if runtime.GOOS == "linux" {
-		log.Debug("Linux detected")
-	} else {
-		log.Fatal(APPNAME+" does not support the %s operating system at this time.", runtime.GOOS)
-	}
 
 	log.SetFormatter(
 		&log.TextFormatter{
@@ -38,6 +31,14 @@ func init() {
 			FullTimestamp: false,
 		},
 	)
+
+	if runtime.GOOS == "darwin" {
+		log.Debug("Mac OS detected")
+	} else if runtime.GOOS == "linux" {
+		log.Debug("Linux detected")
+	} else {
+		log.Fatal(APPNAME+" does not support the %s operating system at this time.", runtime.GOOS)
+	}
 
 }
 
@@ -171,6 +172,13 @@ func main() {
 			EnvVar:      "DEVCLUSTER_SWARM_LOG",
 			Destination: &config.SwarmLog,
 		},
+		cli.StringFlag{
+			Name:        "add, a",
+			Value:       "",
+			Usage:       "add directory to the swarmer containers",
+			EnvVar:      "DEVCLUSTER_ADD",
+			Destination: &config.Add,
+		},
 		cli.BoolFlag{
 			Name:        "follow, f",
 			Usage:       "remain attached and display Swarm logs",
@@ -183,6 +191,8 @@ func main() {
 		// this uses the start command as default if no command given
 		start = cmd.GetStartCommand(config, dockerClient, adminClient, lookup, parser)
 		err := start.Start(c)
+
+		log.Println(err)
 
 		return err
 	}

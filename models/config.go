@@ -13,5 +13,6 @@ type Config struct {
 	Path      string `json:"path" yaml:"path"`
 	DockerLog string `json:"docker_log" yaml:"docker_log"`
 	SwarmLog  string `json:"swarm_log" yaml:"swarm_log"`
+	Add       string `json:"add" yaml:"add"`
 	Follow    bool   `json:"follow" yaml:"follow"`
 }
