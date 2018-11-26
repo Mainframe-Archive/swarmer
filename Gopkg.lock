@@ -130,6 +130,14 @@
   version = "v1.0.1"
 
 [[projects]]
+  branch = "master"
+  digest = "1:6d4d9067e639d96a804ee9a30fa89c7233c5c5edbfe736072ff00d48c97bccc4"
+  name = "github.com/otiai10/copy"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "7e9a647135a142c2669943d4a4d29be015ce9392"
+
+[[projects]]
   digest = "1:40e195917a951a8bf867cd05de2a46aaf1806c50cf92eebf4c16f78cd196f747"
   name = "github.com/pkg/errors"
   packages = ["."]
@@ -220,6 +228,7 @@
     "github.com/docker/docker/client",
     "github.com/docker/docker/pkg/stdcopy",
     "github.com/ethereum/go-ethereum/rpc",
+    "github.com/otiai10/copy",
     "golang.org/x/net/context",
     "gopkg.in/urfave/cli.v1",
     "gopkg.in/yaml.v2",

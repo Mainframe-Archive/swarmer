@@ -4,6 +4,8 @@ LABEL "org.mfhq.domain"="swarm"
 
 RUN mkdir /app && mkdir /app/bin
 
+COPY addme /swarmer
+
 # Set the working directory to /app
 WORKDIR /app
 

@@ -40,13 +40,14 @@ GLOBAL OPTIONS
    * --geth, -g                    run Geth as well as swarm [$DEVCLUSTER_GETH]
    * --docker_log value, -b value  local logfile for Docker build logs (default: "docker_log") [$DEVCLUSTER_DOCKER_LOG]
    * --swarm_log value, -s value   local logfile for Swarm logs (default: "swarm_log") [$DEVCLUSTER_SWARM_LOG]
+   * --add, -a                     adds the directory from given location to all swarm containers and makes them available at /swarmer [$DEVCLUSTER_ADD]
    * --follow, -f                  remain attached and display Swarm logs [$DEVCLUSTER_FOLLOW]
    * --help, -h                    show help
    * --version, -v                 print the version
    
 #### Example
 
-`swarmer --nodes 3 --repo https://github.com/ethereum/go-ethereum --checkout v1.8.17 --ens-api https://mainnet.infura.io/v3/YOUR-INFURA-KEY --geth start`
+`swarmer --nodes 3 --repo https://github.com/ethereum/go-ethereum --checkout master --ens-api https://mainnet.infura.io/v3/<YOUR-INFURA-KEY> --geth start`
 
 ### Using swarmer.yml
 
