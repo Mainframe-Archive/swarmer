@@ -4,22 +4,23 @@ import (
 	"bufio"
 	"encoding/json"
 	"fmt"
-	"github.com/MainframeHQ/swarmer/admin"
-	"github.com/MainframeHQ/swarmer/util"
-	"github.com/docker/docker/api/types/filters"
-	"github.com/docker/docker/pkg/stdcopy"
-	"golang.org/x/net/context"
 	"os"
 	"os/exec"
 	"strconv"
 	"strings"
 
+	"github.com/MainframeHQ/swarmer/admin"
+	"github.com/MainframeHQ/swarmer/util"
+	"github.com/docker/docker/api/types/filters"
+	"github.com/docker/docker/pkg/stdcopy"
+	"golang.org/x/net/context"
+
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/client"
 
 	log "github.com/camronlevanger/logrus"
-	"gopkg.in/urfave/cli.v1"
 	"github.com/otiai10/copy"
+	"gopkg.in/urfave/cli.v1"
 
 	"github.com/MainframeHQ/swarmer/models"
 )
