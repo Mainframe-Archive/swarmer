@@ -3,8 +3,6 @@ package cmd
 import (
 	"encoding/json"
 	"fmt"
-	"strconv"
-
 	"github.com/MainframeHQ/swarmer/admin"
 	"github.com/MainframeHQ/swarmer/models"
 	"github.com/docker/docker/api/types"
@@ -64,17 +62,20 @@ func (s *StatusCommand) Status(c *cli.Context) error {
 	}
 
 	info.Containers = data
-	var nodeAdminPorts []string
+	var nodeCommPorts []string
 	var nodeGatewayPorts []string
+	var nodeWebsocketPorts []string
 	var nodeResults []models.NodeInfo
 
 	// get admin_nodeInfo data
 	for i := range data {
-		nodePort := info.Containers[i].NetworkSettings.Ports["30303/tcp"][0].HostPort
-		nodeAdminPorts = append(nodeAdminPorts, nodePort)
-		gatewayPort := info.Containers[i].NetworkSettings.Ports["8545/tcp"][0].HostPort
+		commPort := info.Containers[i].NetworkSettings.Ports["30303/tcp"][0].HostPort
+		nodeCommPorts = append(nodeCommPorts, commPort)
+		gatewayPort := info.Containers[i].NetworkSettings.Ports["8500/tcp"][0].HostPort
 		nodeGatewayPorts = append(nodeGatewayPorts, gatewayPort)
-		conn, err := s.adminClient.GetConnection("http://localhost:" + gatewayPort)
+		websocketPort := info.Containers[i].NetworkSettings.Ports["8545/tcp"][0].HostPort
+		nodeWebsocketPorts = append(nodeWebsocketPorts, websocketPort)
+		conn, err := s.adminClient.GetConnection("http://localhost:" + websocketPort)
 		if err != nil {
 			return err
 		}
@@ -86,8 +87,10 @@ func (s *StatusCommand) Status(c *cli.Context) error {
 		if err != nil {
 			fmt.Println(err)
 		} else {
-			nodeInfoResult.AdminPort = nodePort
+			nodeInfoResult.ContainerID = info.Containers[i].ID
+			nodeInfoResult.CommPort = commPort
 			nodeInfoResult.GatewayPort = gatewayPort
+			nodeInfoResult.WebsocketPort = websocketPort
 			nodeResults = append(nodeResults, nodeInfoResult)
 		}
 
@@ -101,7 +104,6 @@ func (s *StatusCommand) Status(c *cli.Context) error {
 		}
 
 		fmt.Println(string(jsonData))
-		fmt.Println("There are " + strconv.Itoa(len(nodeResults)) + " active Swarm nodes.")
 	} else {
 		fmt.Println("There are no Swarm nodes running.")
 	}
