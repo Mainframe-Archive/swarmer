@@ -1,3 +1,5 @@
 swarmer
 /.idea
 .DS_Store
+docker/docker_log
+docker/swarm_log
