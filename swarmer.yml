@@ -1,7 +1,7 @@
 repo: "http://github.com/ethereum/go-ethereum"
-checkout: "v1.8.17"
-nodes: 3
+checkout: "master"
+nodes: 1
 ens: "https://mainnet.infura.io/v3/YOUR-INFURA-KEY"
-geth: false
+geth: true
 docker_log: "docker_log"
 swarm_log: "swarm_log"
