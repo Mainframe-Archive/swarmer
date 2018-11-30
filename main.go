@@ -10,6 +10,7 @@ import (
 	"github.com/docker/docker/client"
 
 	log "github.com/camronlevanger/logrus"
+	"github.com/go-errors/errors"
 	"gopkg.in/urfave/cli.v1"
 
 	"github.com/MainframeHQ/swarmer/cmd"
@@ -192,13 +193,11 @@ func main() {
 		start = cmd.GetStartCommand(config, dockerClient, adminClient, lookup, parser)
 		err := start.Start(c)
 
-		log.Println(err)
-
-		return err
+		return errors.Wrap(err, 1)
 	}
 
 	err = app.Run(os.Args)
 	if err != nil {
-		log.Fatal(err)
+		log.Fatalf("Error starting swarm nodes: %+v", err)
 	}
 }

@@ -17,9 +17,8 @@ done
 
 cd /app
 git clone $REPO
-git checkout $CHECKOUT
-
 cd go-ethereum
+git checkout $CHECKOUT
 
 make geth
 make swarm
@@ -34,7 +33,13 @@ if [[ ! -e $DATADIR/keystore ]]; then
     /app/bin/geth  --datadir $DATADIR account new --password $DATADIR/password
 fi
 
-nohup /app/bin/geth --syncmode light --rpc --rpcport 8545 --rpccorsdomain "*" --rpcvhosts "*" --rpcaddr 0.0.0.0 --rpcapi="ws,db,eth,net,web3,personal,admin" &
+nohup /app/bin/geth --syncmode light \
+    --rpc \
+    --rpcport 8545 \
+    --rpcaddr 0.0.0.0 \
+    --rpcapi 'admin,db,eth' \
+    --rpcvhosts "*" \
+    --bootnodes 'enode://e010178fe6d6bbf280348492ce58bb4d139ad40ad6421365dbad1614f06dd48382d110f191456f637d7afb00cb11a4f287471a7b484ebf031d79223c1c10d8d9@18.219.144.15:30303' &
 
 KEY=$(jq --raw-output '.address' $DATADIR/keystore/*)
 
@@ -44,8 +49,7 @@ KEY=$(jq --raw-output '.address' $DATADIR/keystore/*)
     --verbosity 5 \
     --bzzaccount $KEY \
     --httpaddr 0.0.0.0 \
-    --nodiscover \
-    --ens-api "" \
+    --ens-api $ENS \
     --debug \
     --ws \
     --wsaddr 0.0.0.0 \

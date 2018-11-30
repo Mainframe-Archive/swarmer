@@ -3,6 +3,8 @@ services:
   swarm:
     build: .
     command: ["/app/start.sh", "-r ${REPO}", "-c ${CHECKOUT}", "-n ${NODES}", "-e ${ENS}"]
+    networks:
+      - swarm_network
     ports:
       - "8500"
       - "8545"
@@ -10,3 +12,6 @@ services:
       - "30399"
       - "30301"
       - "30303"
+networks:
+  swarm_network:
+    driver: bridge

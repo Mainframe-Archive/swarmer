@@ -27,14 +27,16 @@ type DockerContainers struct {
 
 // NodeInfo holds data we need for peering.
 type NodeInfo struct {
-	CommPort      string `json:"comm_port" yaml:"comm_port"`
-	GatewayPort   string `json:"gateway_port" yaml:"gateway_port"`
-	WebsocketPort string `json:"websocket_port" yaml:"websocket_port"`
-	Enode         string `json:"enode" yaml:"enode"`
-	Enr           string `json:"enr" yaml:"enr"`
-	ID            string `json:"id" yaml:"id"`
-	Name          string `json:"name" yaml:"name"`
-	ContainerID   string `json:"container_id" yaml:"container_id"`
+	CommPort       string   `json:"comm_port" yaml:"comm_port"`
+	GatewayPort    string   `json:"gateway_port" yaml:"gateway_port"`
+	WebsocketPort  string   `json:"websocket_port" yaml:"websocket_port"`
+	AdminPort      string   `json:"admin_port" yaml:"admin_port"`
+	Enode          string   `json:"enode" yaml:"enode"`
+	Enr            string   `json:"enr" yaml:"enr"`
+	ID             string   `json:"id" yaml:"id"`
+	Name           string   `json:"name" yaml:"name"`
+	ContainerID    string   `json:"container_id" yaml:"container_id"`
+	ContainerNames []string `json:"container_names" yaml:"container_names"`
 }
 
 // Ports maps go-ethereum ports section of NodeInfo.

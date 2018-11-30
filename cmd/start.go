@@ -4,10 +4,12 @@ import (
 	"bufio"
 	"encoding/json"
 	"fmt"
+	"github.com/go-errors/errors"
 	"os"
 	"os/exec"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/MainframeHQ/swarmer/admin"
 	"github.com/MainframeHQ/swarmer/util"
@@ -68,16 +70,14 @@ func (s *StartCommand) Start(c *cli.Context) error {
 	if s.config.Repo == "" && s.config.Checkout == "" && s.config.Config == "" {
 		s.config, err = s.parser.ParseYamlConfig("swarmer.yml")
 		if err != nil {
-			log.Fatal(err)
-			return err
+			return errors.Errorf("Error parsing YAML config: %s", err.Error())
 		}
 	}
 
 	if s.config.Config != "" {
 		s.config, err = s.parser.ParseYamlConfig(s.config.Config)
 		if err != nil {
-			log.Fatal(err)
-			return err
+			return errors.Errorf("Error parsing YAML config: %s", err.Error())
 		}
 	}
 
@@ -86,7 +86,7 @@ func (s *StartCommand) Start(c *cli.Context) error {
 	if s.config.Add != "" {
 		err := copy.Copy(s.config.Add, "./addme")
 		if err != nil {
-			return err
+			return errors.Errorf("Error copying directory from host to container: %s", err.Error())
 		}
 	}
 
@@ -98,7 +98,9 @@ func (s *StartCommand) Start(c *cli.Context) error {
 	cmd.Env = append(cmd.Env, "REPO="+s.config.Repo)
 	cmd.Env = append(cmd.Env, "CHECKOUT="+s.config.Checkout)
 	cmd.Env = append(cmd.Env, "CONFIG="+s.config.Config)
-	cmd.Env = append(cmd.Env, "ENS="+s.config.ENS)
+	if s.config.ENS != "" {
+		cmd.Env = append(cmd.Env, "ENS="+s.config.ENS)
+	}
 	cmd.Env = append(cmd.Env, "GETH="+strconv.FormatBool(s.config.Geth))
 
 	stdout, err := cmd.StdoutPipe()
@@ -117,21 +119,20 @@ func (s *StartCommand) Start(c *cli.Context) error {
 		}
 		f, err := os.Create(s.config.DockerLog)
 		if err != nil {
-			panic(err)
+			panic(errors.Wrap(err, 1))
 		}
 		f, err = os.OpenFile(s.config.DockerLog, os.O_APPEND|os.O_WRONLY, 0644)
 		if err != nil {
-			panic(err)
+			panic(errors.Wrap(err, 1))
 		}
 
 		defer f.Close()
 		for scanner.Scan() {
 			line := scanner.Text()
 			if _, err = f.WriteString(line + "\n"); err != nil {
-				panic(err)
+				panic(errors.Wrap(err, 1))
 			}
 			if strings.Contains(line, "started") {
-				fmt.Println(line)
 				break
 			}
 		}
@@ -139,13 +140,12 @@ func (s *StartCommand) Start(c *cli.Context) error {
 
 	err = cmd.Start()
 	if err != nil {
-		log.Error(err.Error())
-		return err
+		return errors.Errorf("Error starting command: %s", err.Error())
 	}
 
 	err = cmd.Wait()
 	if err != nil {
-		log.Error(err.Error())
+		return errors.Errorf("Error waiting for command: %s", err.Error())
 	}
 
 	cmd.Process.Release()
@@ -159,7 +159,7 @@ func (s *StartCommand) Start(c *cli.Context) error {
 
 	containers, err := s.dockerClient.ContainerList(context.Background(), options)
 	if err != nil {
-		panic(err)
+		return errors.Wrap(err, 1)
 	}
 
 	logsOptions := types.ContainerLogsOptions{
@@ -169,37 +169,40 @@ func (s *StartCommand) Start(c *cli.Context) error {
 	}
 
 	var containerInfo types.ContainerJSON
+	var containerNames [][]string
 	var info models.ContainerInfo
 	var data []types.ContainerJSON
 	for _, container := range containers {
 		containerInfo, err = s.dockerClient.ContainerInspect(context.Background(), container.ID)
 		if err != nil {
-			log.Error("Unable to get container data: " + err.Error())
+			return errors.Errorf("Error inspecting container %s: %s", container.ID, err.Error())
 		}
 		data = append(data, containerInfo)
+		containerNames = append(containerNames, container.Names)
 		stream, err := s.dockerClient.ContainerLogs(context.Background(), container.ID, logsOptions)
 		if err != nil {
-			return err
+			return errors.Errorf("Error getting container log stream: %s", err.Error())
 		}
 
 		swarmScanner := bufio.NewScanner(stream)
 
 		f, err := os.Create(s.config.SwarmLog)
 		if err != nil {
-			panic(err)
+			return errors.Errorf("Error creating swarm log file on host: %s", err.Error())
 		}
 		f, err = os.OpenFile(s.config.SwarmLog, os.O_APPEND|os.O_WRONLY, 0644)
 		if err != nil {
-			panic(err)
+			return errors.Errorf("Error opening swarm logs for writing on host: %s", err.Error())
 		}
 
 		defer f.Close()
 		for swarmScanner.Scan() {
 			line := swarmScanner.Text()
 			if _, err = f.WriteString(line + "\n"); err != nil {
-				panic(err)
+				return errors.Errorf("Error writing swarm logs to host machine: %s", err.Error())
 			}
 			if strings.Contains(line, "WebSocket endpoint opened") {
+				time.Sleep(4 * time.Second)
 				break
 			}
 		}
@@ -214,19 +217,23 @@ func (s *StartCommand) Start(c *cli.Context) error {
 	var nodeCommPorts []string
 	var nodeWebsocketPorts []string
 	var nodeGatewayPorts []string
+	var nodeAdminPorts []string
 	var nodeResults []models.NodeInfo
 
 	// get admin_nodeInfo data
 	for i := range data {
+		adminPort := info.Containers[i].NetworkSettings.Ports["8545/tcp"][0].HostPort
+		nodeAdminPorts = append(nodeAdminPorts, adminPort)
 		commPort := info.Containers[i].NetworkSettings.Ports["30303/tcp"][0].HostPort
 		nodeCommPorts = append(nodeCommPorts, commPort)
-		websocketPort := info.Containers[i].NetworkSettings.Ports["8545/tcp"][0].HostPort
+		websocketPort := info.Containers[i].NetworkSettings.Ports["8546/tcp"][0].HostPort
 		nodeWebsocketPorts = append(nodeWebsocketPorts, websocketPort)
 		gatewayPort := info.Containers[i].NetworkSettings.Ports["8500/tcp"][0].HostPort
-		nodeGatewayPorts = append(nodeGatewayPorts, websocketPort)
-		conn, err := s.adminClient.GetConnection("http://localhost:" + websocketPort)
+		nodeGatewayPorts = append(nodeGatewayPorts, gatewayPort)
+
+		conn, err := s.adminClient.GetConnection("http://localhost:" + adminPort)
 		if err != nil {
-			return err
+			return errors.Errorf("Error instantiating Geth admin connection over RPC: %s", err.Error())
 		}
 
 		var nodeInfoResult models.NodeInfo
@@ -234,47 +241,43 @@ func (s *StartCommand) Start(c *cli.Context) error {
 
 		err = conn.Call(&nodeInfoResult, "admin_nodeInfo", args)
 		if err != nil {
-			fmt.Println(err)
-		} else {
-			nodeInfoResult.ContainerID = info.Containers[i].ID
-			nodeInfoResult.CommPort = commPort
-			nodeInfoResult.GatewayPort = gatewayPort
-			nodeInfoResult.WebsocketPort = websocketPort
-			nodeResults = append(nodeResults, nodeInfoResult)
+			return errors.Errorf("Unable to call nodeInfo function on geth node: %s", err.Error())
 		}
+
+		nodeInfoResult.ContainerID = info.Containers[i].ID
+		nodeInfoResult.CommPort = commPort
+		nodeInfoResult.GatewayPort = gatewayPort
+		nodeInfoResult.WebsocketPort = websocketPort
+		nodeInfoResult.AdminPort = adminPort
+		nodeInfoResult.ContainerNames = containerNames[i]
+		nodeResults = append(nodeResults, nodeInfoResult)
 
 		conn.Close()
 	}
 
 	var peerResult bool
 
-	// TODO: Need to figure out how to get web3.js name resolution to work in docker. This won't work in Linux.
-	//dockerHost, err := s.lookup.GetIP("host.docker.internal")
-	//if err != nil {
-	//	return err
-	//}
-
 	// peering
 	if len(nodeResults) > 1 {
 		for _, nodeResult := range nodeResults {
-			conn, err := s.adminClient.GetConnection("http://localhost:" + nodeResult.WebsocketPort)
+			conn, err := s.adminClient.GetConnection("http://localhost:" + nodeResult.AdminPort)
 			if err != nil {
-				return err
+				return errors.Errorf("Unable to connect to geth on port %s", nodeResult.AdminPort)
 			}
 
 			splitEnode := strings.Split(nodeResult.Enode, "@")
-			enode := splitEnode[0] + "192.168.65.1:" + nodeResult.CommPort
+			enode := splitEnode[0] + nodeResult.ContainerNames[0] + ":" + nodeResult.CommPort
 
 			err = conn.Call(&peerResult, "admin_addPeer", enode)
 			if err != nil {
-				fmt.Println(err)
+				return errors.Errorf("Unable to call addPeer function on geth node: %s", err.Error())
 			}
 		}
 	}
 
 	jsonData, err := json.MarshalIndent(nodeResults, "", "  ")
 	if err != nil {
-		log.Error(err.Error())
+		return errors.Wrap(err, 1)
 	}
 
 	fmt.Println(string(jsonData))

@@ -3,6 +3,7 @@ package cmd
 import (
 	"encoding/json"
 	"fmt"
+
 	"github.com/MainframeHQ/swarmer/admin"
 	"github.com/MainframeHQ/swarmer/models"
 	"github.com/docker/docker/api/types"
@@ -51,6 +52,7 @@ func (s *StatusCommand) Status(c *cli.Context) error {
 	}
 
 	var containerInfo types.ContainerJSON
+	var containerNames [][]string
 	var info models.ContainerInfo
 	var data []types.ContainerJSON
 	for _, container := range containers {
@@ -59,22 +61,26 @@ func (s *StatusCommand) Status(c *cli.Context) error {
 			return err
 		}
 		data = append(data, containerInfo)
+		containerNames = append(containerNames, container.Names)
 	}
 
 	info.Containers = data
 	var nodeCommPorts []string
-	var nodeGatewayPorts []string
 	var nodeWebsocketPorts []string
+	var nodeGatewayPorts []string
+	var nodeAdminPorts []string
 	var nodeResults []models.NodeInfo
 
 	// get admin_nodeInfo data
 	for i := range data {
+		adminPort := info.Containers[i].NetworkSettings.Ports["8545/tcp"][0].HostPort
+		nodeAdminPorts = append(nodeAdminPorts, adminPort)
 		commPort := info.Containers[i].NetworkSettings.Ports["30303/tcp"][0].HostPort
 		nodeCommPorts = append(nodeCommPorts, commPort)
+		websocketPort := info.Containers[i].NetworkSettings.Ports["8546/tcp"][0].HostPort
+		nodeWebsocketPorts = append(nodeWebsocketPorts, websocketPort)
 		gatewayPort := info.Containers[i].NetworkSettings.Ports["8500/tcp"][0].HostPort
 		nodeGatewayPorts = append(nodeGatewayPorts, gatewayPort)
-		websocketPort := info.Containers[i].NetworkSettings.Ports["8545/tcp"][0].HostPort
-		nodeWebsocketPorts = append(nodeWebsocketPorts, websocketPort)
 		conn, err := s.adminClient.GetConnection("http://localhost:" + websocketPort)
 		if err != nil {
 			return err
@@ -86,13 +92,15 @@ func (s *StatusCommand) Status(c *cli.Context) error {
 		err = conn.Call(&nodeInfoResult, "admin_nodeInfo", args)
 		if err != nil {
 			fmt.Println(err)
-		} else {
-			nodeInfoResult.ContainerID = info.Containers[i].ID
-			nodeInfoResult.CommPort = commPort
-			nodeInfoResult.GatewayPort = gatewayPort
-			nodeInfoResult.WebsocketPort = websocketPort
-			nodeResults = append(nodeResults, nodeInfoResult)
 		}
+
+		nodeInfoResult.ContainerID = info.Containers[i].ID
+		nodeInfoResult.CommPort = commPort
+		nodeInfoResult.GatewayPort = gatewayPort
+		nodeInfoResult.WebsocketPort = websocketPort
+		nodeInfoResult.AdminPort = adminPort
+		nodeInfoResult.ContainerNames = containerNames[i]
+		nodeResults = append(nodeResults, nodeInfoResult)
 
 		conn.Close()
 	}
