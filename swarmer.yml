@@ -1,7 +1,7 @@
-repo: "http://github.com/ethereum/go-ethereum"
+repo: "https://github.com/ethereum/go-ethereum"
 checkout: "master"
 nodes: 1
-ens: "https://mainnet.infura.io/v3/YOUR-INFURA-KEY"
+ens-api: "https://mainnet.infura.io/v3/<REPLACE-WITH-YOUR-INFURA-KEY>"
 geth: true
 docker_log: "docker_log"
 swarm_log: "swarm_log"
