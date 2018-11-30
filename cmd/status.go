@@ -92,15 +92,15 @@ func (s *StatusCommand) Status(c *cli.Context) error {
 		err = conn.Call(&nodeInfoResult, "admin_nodeInfo", args)
 		if err != nil {
 			fmt.Println(err)
-		} else {
-			nodeInfoResult.ContainerID = info.Containers[i].ID
-			nodeInfoResult.CommPort = commPort
-			nodeInfoResult.GatewayPort = gatewayPort
-			nodeInfoResult.WebsocketPort = websocketPort
-			nodeInfoResult.AdminPort = adminPort
-			nodeInfoResult.ContainerNames = containerNames[i]
-			nodeResults = append(nodeResults, nodeInfoResult)
 		}
+
+		nodeInfoResult.ContainerID = info.Containers[i].ID
+		nodeInfoResult.CommPort = commPort
+		nodeInfoResult.GatewayPort = gatewayPort
+		nodeInfoResult.WebsocketPort = websocketPort
+		nodeInfoResult.AdminPort = adminPort
+		nodeInfoResult.ContainerNames = containerNames[i]
+		nodeResults = append(nodeResults, nodeInfoResult)
 
 		conn.Close()
 	}

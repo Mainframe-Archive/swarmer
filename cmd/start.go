@@ -242,15 +242,15 @@ func (s *StartCommand) Start(c *cli.Context) error {
 		err = conn.Call(&nodeInfoResult, "admin_nodeInfo", args)
 		if err != nil {
 			return errors.Errorf("Unable to call nodeInfo function on geth node: %s", err.Error())
-		} else {
-			nodeInfoResult.ContainerID = info.Containers[i].ID
-			nodeInfoResult.CommPort = commPort
-			nodeInfoResult.GatewayPort = gatewayPort
-			nodeInfoResult.WebsocketPort = websocketPort
-			nodeInfoResult.AdminPort = adminPort
-			nodeInfoResult.ContainerNames = containerNames[i]
-			nodeResults = append(nodeResults, nodeInfoResult)
 		}
+
+		nodeInfoResult.ContainerID = info.Containers[i].ID
+		nodeInfoResult.CommPort = commPort
+		nodeInfoResult.GatewayPort = gatewayPort
+		nodeInfoResult.WebsocketPort = websocketPort
+		nodeInfoResult.AdminPort = adminPort
+		nodeInfoResult.ContainerNames = containerNames[i]
+		nodeResults = append(nodeResults, nodeInfoResult)
 
 		conn.Close()
 	}
