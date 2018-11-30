@@ -95,6 +95,14 @@
   version = "v1.8.17"
 
 [[projects]]
+  digest = "1:aacef5f5e45685f2aeda5534d0a750dee6859de7e9088cdd06192787bb01ae6d"
+  name = "github.com/go-errors/errors"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "a6af135bd4e28680facf08a3d206b454abc877a4"
+  version = "v1.0.1"
+
+[[projects]]
   digest = "1:33542eaf895b5489ccfb059502a721f0e8875379da8b3ff60fdd9212d503705c"
   name = "github.com/go-stack/stack"
   packages = ["."]
@@ -228,6 +236,7 @@
     "github.com/docker/docker/client",
     "github.com/docker/docker/pkg/stdcopy",
     "github.com/ethereum/go-ethereum/rpc",
+    "github.com/go-errors/errors",
     "github.com/otiai10/copy",
     "golang.org/x/net/context",
     "gopkg.in/urfave/cli.v1",
