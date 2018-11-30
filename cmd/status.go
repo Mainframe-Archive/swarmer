@@ -81,7 +81,8 @@ func (s *StatusCommand) Status(c *cli.Context) error {
 		nodeWebsocketPorts = append(nodeWebsocketPorts, websocketPort)
 		gatewayPort := info.Containers[i].NetworkSettings.Ports["8500/tcp"][0].HostPort
 		nodeGatewayPorts = append(nodeGatewayPorts, gatewayPort)
-		conn, err := s.adminClient.GetConnection("http://localhost:" + websocketPort)
+
+		conn, err := s.adminClient.GetConnection("http://localhost:" + adminPort)
 		if err != nil {
 			return err
 		}
