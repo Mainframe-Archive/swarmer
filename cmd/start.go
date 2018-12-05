@@ -4,18 +4,17 @@ import (
 	"bufio"
 	"encoding/json"
 	"fmt"
+	"github.com/MainframeHQ/swarmer/admin"
+	"github.com/MainframeHQ/swarmer/util"
+	"github.com/docker/docker/api/types/filters"
+	"github.com/docker/docker/pkg/stdcopy"
 	"github.com/go-errors/errors"
+	"golang.org/x/net/context"
 	"os"
 	"os/exec"
 	"strconv"
 	"strings"
 	"time"
-
-	"github.com/MainframeHQ/swarmer/admin"
-	"github.com/MainframeHQ/swarmer/util"
-	"github.com/docker/docker/api/types/filters"
-	"github.com/docker/docker/pkg/stdcopy"
-	"golang.org/x/net/context"
 
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/client"
@@ -170,6 +169,7 @@ func (s *StartCommand) Start(c *cli.Context) error {
 
 	var containerInfo types.ContainerJSON
 	var containerNames [][]string
+	var splitNames []string
 	var info models.ContainerInfo
 	var data []types.ContainerJSON
 	for _, container := range containers {
@@ -177,8 +177,17 @@ func (s *StartCommand) Start(c *cli.Context) error {
 		if err != nil {
 			return errors.Errorf("Error inspecting container %s: %s", container.ID, err.Error())
 		}
+
 		data = append(data, containerInfo)
-		containerNames = append(containerNames, container.Names)
+
+		for _, name := range container.Names {
+			tokens := strings.Split(name, "/")
+			name = tokens[1]
+			splitNames = append(splitNames, name)
+		}
+
+		containerNames = append(containerNames, splitNames)
+
 		stream, err := s.dockerClient.ContainerLogs(context.Background(), container.ID, logsOptions)
 		if err != nil {
 			return errors.Errorf("Error getting container log stream: %s", err.Error())
@@ -202,7 +211,6 @@ func (s *StartCommand) Start(c *cli.Context) error {
 				return errors.Errorf("Error writing swarm logs to host machine: %s", err.Error())
 			}
 			if strings.Contains(line, "WebSocket endpoint opened") {
-				time.Sleep(4 * time.Second)
 				break
 			}
 		}
@@ -250,6 +258,7 @@ func (s *StartCommand) Start(c *cli.Context) error {
 		nodeInfoResult.WebsocketPort = websocketPort
 		nodeInfoResult.AdminPort = adminPort
 		nodeInfoResult.ContainerNames = containerNames[i]
+		nodeInfoResult.IPAddress = info.Containers[i].NetworkSettings.Networks["docker_swarm_network"].IPAddress
 		nodeResults = append(nodeResults, nodeInfoResult)
 
 		conn.Close()
@@ -257,20 +266,30 @@ func (s *StartCommand) Start(c *cli.Context) error {
 
 	var peerResult bool
 
+	// just a safety buffer to make sure the nodeInfo is setup (I know this sucks, I'll get to it...)
+	time.Sleep(4 * time.Second)
+
 	// peering
 	if len(nodeResults) > 1 {
-		for _, nodeResult := range nodeResults {
+		for i, nodeResult := range nodeResults {
 			conn, err := s.adminClient.GetConnection("http://localhost:" + nodeResult.AdminPort)
 			if err != nil {
 				return errors.Errorf("Unable to connect to geth on port %s", nodeResult.AdminPort)
 			}
 
-			splitEnode := strings.Split(nodeResult.Enode, "@")
-			enode := splitEnode[0] + nodeResult.ContainerNames[0] + ":" + nodeResult.CommPort
+			var nextNode int
+			if i < (len(nodeResults) - 1) {
+				nextNode = i + 1
+			} else {
+				nextNode = 0
+			}
+
+			splitEnode := strings.Split(nodeResults[nextNode].Enode, "@")
+			enode := splitEnode[0] + "@" + nodeResults[nextNode].IPAddress + ":" + nodeResults[nextNode].CommPort
 
 			err = conn.Call(&peerResult, "admin_addPeer", enode)
 			if err != nil {
-				return errors.Errorf("Unable to call addPeer function on geth node: %s", err.Error())
+				return errors.Errorf("Unable to call addPeer function on geth node %s with enode %s - %s", nodeResult.ContainerNames[0], enode, err.Error())
 			}
 		}
 	}

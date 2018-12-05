@@ -5,6 +5,8 @@ services:
     command: ["/app/start.sh", "-r ${REPO}", "-c ${CHECKOUT}", "-n ${NODES}", "-e ${ENS}"]
     networks:
       - swarm_network
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
     ports:
       - "8500"
       - "8545"
