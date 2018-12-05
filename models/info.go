@@ -37,6 +37,7 @@ type NodeInfo struct {
 	Name           string   `json:"name" yaml:"name"`
 	ContainerID    string   `json:"container_id" yaml:"container_id"`
 	ContainerNames []string `json:"container_names" yaml:"container_names"`
+	IPAddress      string   `json:"ip" yaml:"ip"`
 }
 
 // Ports maps go-ethereum ports section of NodeInfo.
