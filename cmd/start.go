@@ -111,10 +111,10 @@ func (s *StartCommand) Start(c *cli.Context) error {
 
 	go func() {
 		if s.config.DockerLog == "" {
-			s.config.DockerLog = "docker_log"
+			s.config.DockerLog = "/var/log/docker_log"
 		}
 		if s.config.SwarmLog == "" {
-			s.config.DockerLog = "swarm_log"
+			s.config.DockerLog = "/var/log/swarm_log"
 		}
 		f, err := os.Create(s.config.DockerLog)
 		if err != nil {
