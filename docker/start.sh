@@ -37,7 +37,7 @@ nohup /app/bin/geth --syncmode light \
     --rpc \
     --rpcport 8545 \
     --rpcaddr 0.0.0.0 \
-    --rpcapi 'admin,db,eth' \
+    --rpcapi 'admin,db,eth,personal' \
     --rpcvhosts "*" \
     --bootnodes 'enode://e010178fe6d6bbf280348492ce58bb4d139ad40ad6421365dbad1614f06dd48382d110f191456f637d7afb00cb11a4f287471a7b484ebf031d79223c1c10d8d9@18.219.144.15:30303' &
 
